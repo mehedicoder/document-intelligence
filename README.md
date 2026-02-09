@@ -1,75 +1,44 @@
-# Document Intelligence 🧠
+# 🧠 Document Intelligence
+**A private, local-first AI assistant that actually knows your files.**
 
-**Document Intelligence** is a high-performance Java utility built on the **LangChain4j** framework. It leverages local LLM embeddings via **Ollama** to rank and retrieve the most relevant sections of text from your local directories using semantic search.
+[![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
+[![LangChain4j](https://img.shields.io/badge/Framework-LangChain4j-blue.svg)](https://github.com/langchain4j/langchain4j)
+[![Ollama](https://img.shields.io/badge/Embeddings-Ollama-white.svg)](https://ollama.ai/)
 
-By utilizing **Java 21 Virtual Threads (Project Loom)**, the system processes large document sets in parallel, ensuring high-speed indexing and retrieval.
+I built **Document Intelligence** because I was tired of "Command+F-ing" through dozens of PDFs and notes just to find one specific detail. This tool transforms your local folders into a searchable, interactive knowledge base using Retrieval-Augmented Generation (RAG).
+
+Unlike most AI tools, this doesn't require you to upload your sensitive data to the cloud. Everything—from indexing to searching—happens on your own hardware.
 
 ---
 
 ## 🚀 Key Features
 
-* **100% Local & Private:** Powered by `nomic-embed-text` via Ollama. No data is sent to the cloud.
-* **Parallel Processing:** Uses a Virtual Thread executor to handle file extraction and chunking concurrently.
-* **Context-Aware Splitting:** Uses a **Recursive Character Splitter** with overlapping chunks to prevent losing information at the edges of a "cut."
-* **Semantic Ranking:** Uses **Cosine Similarity** to find answers based on meaning, not just exact keyword matches.
-* **Smart Metadata:** Automatically tracks the source file for every text segment retrieved.
+* **100% Data Privacy:** We use local **Ollama** embeddings (`nomic-embed-text`). Your files stay where they belong: on your machine.
+* **Virtual Thread Performance:** Built on **Java 21**, the system uses Virtual Threads (Project Loom) to process and index massive document sets in parallel.
+* **Verified Citations:** No more AI "hallucinations." Every answer includes the specific source filename (e.g., `(Source: roadmap_2026.pdf)`).
+* **Streaming & Thinking:** Features a professional "thinking" indicator and human-like streaming response for a smooth, Ollama-style CLI experience.
+* **Persistent Memory:** It remembers your conversation context, so you can ask follow-up questions without repeating yourself.
 
 ---
 
-## 📂 Supported File Types
+## 📂 Supported Formats
 
-The engine automatically filters and processes the following formats:
-
-| Format | Extension | Description |
-| :--- | :--- | :--- |
-| **Documents** | `.pdf`, `.docx` | Fixed layout and rich text word documents. |
-| **Technical** | `.md`, `.markdown` | Documentation and developer notes. |
-| **Data** | `.csv`, `.json` | Structured data and configuration logs. |
-| **Plain Text** | `.txt` | Standard raw text files. |
+| Category | File Types |
+| :--- | :--- |
+| **Documents** | `.pdf`, `.docx` |
+| **Technical** | `.md`, `.markdown`, `.txt` |
+| **Data** | `.csv`, `.json` |
 
 ---
 
-## 🛠️ Prerequisites
+## 🛠️ Setup & Installation
 
-1.  **Java 21 or higher** (Required for Virtual Thread support).
-2.  **Ollama** installed and running on `localhost:11434`.
-3.  **Embedding Model:** Pull the default model by running:
-    ```bash
-    ollama pull nomic-embed-text
-    ```
+### 1. Prerequisites
+* **Java 21+** (The Virtual Thread magic depends on it).
+* **Ollama** installed and running on `localhost:11434`.
+* **Groq API Key:** Set as an environment variable: `GROQ_API_KEY`.
 
----
-
-## ⚙️ Core Logic Configuration
-
-The system uses the following defaults for optimal performance with Local LLMs:
-
-* **Chunk Size:** `500` characters (ensures segments are focused and digestible).
-* **Chunk Overlap:** `100` characters (provides "connective tissue" between segments).
-* **Embedding Model:** `nomic-embed-text:latest`.
-* **Top-K Results:** Returns the **5** most relevant matches per query.
-
----
-
-## 📖 How It Works
-
-1.  **Ingestion:** The app scans your provided directory and filters for supported files.
-2.  **Chunking:** The `DocumentSplitter` breaks long texts into 500-character pieces.
-3.  **Vectorization:** Ollama converts your text segments into high-dimensional vectors (embeddings).
-4.  **Querying:** When you ask a question, your query is also converted into a vector.
-5.  **Similarity Match:** The system calculates the "distance" between your query vector and all document vectors, returning the closest matches.
-
----
-
-## 🖥️ Usage
-
-1.  **Start Ollama** on your machine.
-2.  **Run the application:** `java com.intelligence.agent.TextSimilarityRanker.java`
-3.  **Provide Directory:** Input the path to your documents when prompted.
-4.  **Query:** Type your question.
-    * *Example:* "What are the project requirements for the 2026 launch?"
-5.  **Analyze:** View the ranked results, including similarity scores (0.0 to 1.0) and source file names.
-
----
-
-*Generated by Document Intelligence v1.0*
+### 2. Pull the Models
+Open your terminal and grab the embedding model:
+```bash
+ollama pull nomic-embed-text
