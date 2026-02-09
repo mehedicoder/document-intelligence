@@ -1,5 +1,6 @@
-package com.intelligence;
+package com.intelligence.agent;
 
+import com.intelligence.agent.TextSimilarityRanker;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;

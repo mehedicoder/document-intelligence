@@ -1,5 +1,6 @@
-package com.intelligence;
+package com.intelligence.agent;
 
+import com.intelligence.reader.*;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.Metadata;
@@ -21,7 +22,7 @@ import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 /**
- * com.intelligence.TextSimilarityRanker v3.5
+ * com.intelligence.agent.TextSimilarityRanker v1.0
  * Now fully integrated with SLF4J Logging.
  */
 public class TextSimilarityRanker {
@@ -91,6 +92,7 @@ public class TextSimilarityRanker {
 
     static List<TextSegment> fetchUniqueTextSegmentsFromDirectory(String directoryPath) {
         log.debug("Scanning directory for supported files...");
+
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             List<Path> files;
             try (Stream<Path> stream = Files.list(Paths.get(directoryPath))) {
@@ -110,14 +112,23 @@ public class TextSimilarityRanker {
             List<Future<List<TextSegment>>> futures = files.stream()
                     .map(path -> executor.submit(() -> {
                         log.debug("Extracting and chunking: {}", path.getFileName());
+
+                        // 1. Extract the text
                         String rawText = String.join(" ", extractContent(path));
+                        String fileName = path.getFileName().toString();
 
-                        Map<String, String> metaMap = new HashMap<>();
-                        metaMap.put("file_name", path.getFileName().toString());
-                        Metadata metadata = Metadata.from(metaMap);
-
+                        // 2. Create the Document with the filename metadata
+                        Metadata metadata = Metadata.from("file_name", fileName);
                         Document doc = Document.from(rawText, metadata);
-                        return splitter.split(doc);
+
+                        // 3. Split the document into segments
+                        List<TextSegment> splitSegments = splitter.split(doc);
+
+                        // 4. FIX: Manually re-map segments to guarantee they carry the metadata
+                        // This bypasses issues where some splitters don't propagate metadata correctly
+                        return splitSegments.stream()
+                                .map(segment -> TextSegment.from(segment.text(), Metadata.from("file_name", fileName)))
+                                .toList();
                     }))
                     .toList();
 
@@ -129,14 +140,15 @@ public class TextSimilarityRanker {
                     log.error("Critical error processing a file task: {}", e.getMessage());
                 }
             }
+
             log.info("Successfully created {} total segments from {} files.", allSegments.size(), files.size());
             return allSegments;
+
         } catch (IOException e) {
             log.error("IO Error while accessing directory {}: {}", directoryPath, e.getMessage());
             return Collections.emptyList();
         }
     }
-
     static Map<TextSegment, Double> rankSegments(EmbeddingModel model, String query, List<TextSegment> segments) {
         log.debug("Embedding query and segments via Ollama...");
         float[] queryVec = model.embed(query).content().vector();

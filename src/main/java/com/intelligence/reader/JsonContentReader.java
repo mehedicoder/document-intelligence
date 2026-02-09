@@ -1,4 +1,4 @@
-package com.intelligence;
+package com.intelligence.reader;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-class JsonContentReader {
+public class JsonContentReader {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     /**

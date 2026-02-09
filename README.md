@@ -64,7 +64,7 @@ The system uses the following defaults for optimal performance with Local LLMs:
 ## 🖥️ Usage
 
 1.  **Start Ollama** on your machine.
-2.  **Run the application:** `java com.intelligence.TextSimilarityRanker.java`
+2.  **Run the application:** `java com.intelligence.agent.TextSimilarityRanker.java`
 3.  **Provide Directory:** Input the path to your documents when prompted.
 4.  **Query:** Type your question.
     * *Example:* "What are the project requirements for the 2026 launch?"

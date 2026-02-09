@@ -1,4 +1,4 @@
-package com.intelligence;
+package com.intelligence.reader;
 
 import com.opencsv.CSVReader;
 
@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class CsvContentReader {
+public class CsvContentReader {
     /**
      * Reads CSV and joins columns into a single descriptive string per row.
      */

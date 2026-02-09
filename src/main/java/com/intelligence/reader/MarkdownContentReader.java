@@ -1,4 +1,4 @@
-package com.intelligence;
+package com.intelligence.reader;
 
 import org.commonmark.node.*;
 import org.commonmark.parser.Parser;

@@ -1,4 +1,4 @@
-package com.intelligence;
+package com.intelligence.reader;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
-class PdfContentReader {
+public class PdfContentReader {
     public static List<String> read(Path path) throws IOException {
         try (PDDocument document = Loader.loadPDF(path.toFile())) {
             PDFTextStripper stripper = new PDFTextStripper();
