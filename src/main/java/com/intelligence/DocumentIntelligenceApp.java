@@ -23,23 +23,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DocumentIntelligenceApp {
     private static final Logger log = LoggerFactory.getLogger(DocumentIntelligenceApp.class);
 
-    // --- Configuration Constants ---
     private static final String GROQ_BASE_URL = "https://api.groq.com/openai/v1";
     private static final String GROQ_MODEL_NAME = "llama-3.3-70b-versatile";
     private static final String GROQ_API_KEY_ENV = "GROQ_API_KEY";
-
     private static final String OLLAMA_SERVICE_URL = "http://localhost:11434";
     private static final String EMBEDDING_MODEL_NAME = "nomic-embed-text:latest";
 
-    private static final String DATA_RESOURCES_PATH = "./src/main/resources/";
+    private static final String DEFAULT_DATA_PATH = "./src/main/resources/";
     private static final int CHAT_MEMORY_MAX_MESSAGES = 20;
     private static final int MODEL_TIMEOUT_SECONDS = 120;
 
     public static void main(String[] args) {
-        // force UTF-8 character encoding
         System.setProperty("file.encoding", "UTF-8");
 
-        //Initialize Components
         StreamingChatModel chatModel = createStreamingModel();
         EmbeddingModel embeddingModel = createEmbeddingModel();
         ChatMemoryStore store = new PersistentChatMemoryStore();
@@ -48,32 +44,48 @@ public class DocumentIntelligenceApp {
 
         System.out.println("\n==============================================");
         System.out.println("   DOCUMENT INTELLIGENCE AGENT (v2.0)");
-        System.out.println("   Type 'exit', 'quit', or 'bye' to stop.");
         System.out.println("==============================================\n");
 
+        outerLoop:
         while (true) {
-            System.out.print("\nEnter data folder path (Enter for default & exit): ");
-            String dataDir = scanner.nextLine().trim();
-            ContextRetriever contextRetriever;
+            // 1. Data Folder Selection
+            System.out.println("\n[STEP 1: Load Data]");
+            System.out.print("Enter data folder path (or press Enter for 'default'): ");
+            String inputDir = scanner.nextLine().trim();
 
-            if (dataDir.isBlank() || dataDir.isBlank() || dataDir.equals("default")) contextRetriever= new ContextRetriever(embeddingModel, dataDir);
-            else contextRetriever= new ContextRetriever(embeddingModel, dataDir);
+            if (isExitCommand(inputDir)) break;
 
-            //Build the Assistant
+            String resolvedPath = (inputDir.isEmpty() || inputDir.equalsIgnoreCase("default"))
+                    ? DEFAULT_DATA_PATH : inputDir;
+
+            System.out.println(">> Loading context from: " + resolvedPath);
+            ContextRetriever contextRetriever = new ContextRetriever(embeddingModel, resolvedPath);
             DocumentAssistantAgent assistant = buildAssistant(chatModel, contextRetriever, store);
-            System.out.print("Ask: ");
-            String query = scanner.nextLine().trim();
 
-            if (isExitCommand(query)) {
-                System.out.println("AI: Goodbye! Have a productive day.");
-                break;
+            // 2. Question Loop for the current folder
+            while (true) {
+                System.out.print("\nAsk your question: ");
+                String query = scanner.nextLine().trim();
+
+                if (isExitCommand(query)) break outerLoop;
+                if (query.isEmpty()) continue;
+
+                executeStreamingChat(assistant, userId, query);
+
+                // 3. Post-Answer Prompt
+                System.out.print("\n\nContinue with this folder? (yes/continue) or enter 'new' for another folder: ");
+                String choice = scanner.nextLine().trim().toLowerCase();
+
+                if (isExitCommand(choice)) break outerLoop;
+
+                if (choice.equals("new") || choice.equals("another")) {
+                    break; // Breaks inner loop to ask for a new folder in outer loop
+                }
+                // If they type 'yes' or 'continue', the inner loop repeats
             }
-
-            if (query.isEmpty()) continue;
-
-            executeStreamingChat(assistant, userId, query);
-            System.out.println();
         }
+
+        System.out.println("\nAI: Goodbye! Have a productive day.");
         scanner.close();
     }
 
@@ -83,7 +95,7 @@ public class DocumentIntelligenceApp {
                 input.equalsIgnoreCase("bye");
     }
 
-    // --- Builder Methods ---
+    // --- Helper & Builder Methods ---
 
     private static StreamingChatModel createStreamingModel() {
         return OpenAiStreamingChatModel.builder()
@@ -117,28 +129,19 @@ public class DocumentIntelligenceApp {
         CompletableFuture<Void> future = new CompletableFuture<>();
         AtomicBoolean isFirstToken = new AtomicBoolean(true);
 
-        // 1. Show the "Thinking" state immediately
         System.out.print("AI: thinking...");
         System.out.flush();
 
         assistant.chatStreaming(userId, question)
                 .onPartialResponse(token -> {
-                    // 2. Clear "thinking..." when the first token arrives
                     if (isFirstToken.getAndSet(false)) {
-                        // \r moves cursor to start of line, then we print spaces to clear the text
                         System.out.print("\rAI:               \rAI: ");
                         System.out.flush();
                     }
-
-                    // 3. Print the token with your typing effect
                     stochasticPrint(token);
                 })
-                .onCompleteResponse(response -> {
-                    System.out.println(); // Finish the line
-                    future.complete(null);
-                })
+                .onCompleteResponse(response -> future.complete(null))
                 .onError(err -> {
-                    // Clear the thinking indicator if an error occurs
                     System.out.print("\rAI: [ERROR]       \n");
                     System.err.println(err.getMessage());
                     future.complete(null);
@@ -147,6 +150,7 @@ public class DocumentIntelligenceApp {
 
         future.join();
     }
+
     private static void stochasticPrint(String chunk) {
         Random random = ThreadLocalRandom.current();
         for (char c : chunk.toCharArray()) {
