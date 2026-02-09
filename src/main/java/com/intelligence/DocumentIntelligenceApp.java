@@ -2,6 +2,7 @@ package com.intelligence;
 
 import com.intelligence.agent.DocumentAssistantAgent;
 import com.intelligence.agent.ContextRetriever;
+import com.intelligence.agent.KnowledgeBaseTools;
 import com.intelligence.agent.PersistentChatMemoryStore;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -112,14 +113,32 @@ public class DocumentIntelligenceApp {
                 .modelName(EMBEDDING_MODEL_NAME)
                 .build();
     }
-
-    private static DocumentAssistantAgent buildAssistant(StreamingChatModel chatModel, ContextRetriever retriever, ChatMemoryStore store) {
+     // passive RAG
+    /*private static DocumentAssistantAgent buildAssistant(StreamingChatModel chatModel, ContextRetriever retriever, ChatMemoryStore store) {
         return AiServices.builder(DocumentAssistantAgent.class)
                 .streamingChatModel(chatModel)
                 .contentRetriever(retriever)
                 .chatMemoryProvider(chatId -> MessageWindowChatMemory.builder()
                         .id(chatId)
                         .maxMessages(CHAT_MEMORY_MAX_MESSAGES)
+                        .chatMemoryStore(store)
+                        .build())
+                .build();
+    }*/
+
+    // reasoning agent
+
+    private static DocumentAssistantAgent buildAssistant(
+            StreamingChatModel chatModel,
+            ContextRetriever retriever,
+            ChatMemoryStore store) {
+
+        return AiServices.builder(DocumentAssistantAgent.class)
+                .streamingChatModel(chatModel)
+                .tools(new KnowledgeBaseTools(retriever))
+                .chatMemoryProvider(chatId -> MessageWindowChatMemory.builder()
+                        .id(chatId)
+                        .maxMessages(20)
                         .chatMemoryStore(store)
                         .build())
                 .build();
