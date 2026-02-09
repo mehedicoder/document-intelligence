@@ -1,0 +1,70 @@
+# ========================================
+# IntelliJ IDEA
+# ========================================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ========================================
+# Gradle
+# ========================================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ========================================
+# OS Files
+# ========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ========================================
+# Logs and temporary files
+# ========================================
+*.log
+*.tmp
+*.bak
+*.swp
+
+# ========================================
+# Dependency caches
+# ========================================
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+/.gradle/
+/out/
+
+# ========================================
+# Generated project files
+# ========================================
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# ========================================
+# Test reports
+# ========================================
+/build/reports/
+/build/test-results/
+
+# ========================================
+# Secrets and config files
+# =
