@@ -61,7 +61,7 @@ public class DocumentIntelligenceApp {
 
             System.out.println(">> Loading context from: " + resolvedPath);
             ContextRetriever contextRetriever = new ContextRetriever(embeddingModel, resolvedPath);
-            DocumentAssistantAgent assistant = buildAssistant(chatModel, contextRetriever, store);
+            DocumentAssistantAgent assistant = buildAssistant(chatModel, contextRetriever, store, resolvedPath);
 
             // 2. Question Loop for the current folder
             while (true) {
@@ -131,11 +131,12 @@ public class DocumentIntelligenceApp {
     private static DocumentAssistantAgent buildAssistant(
             StreamingChatModel chatModel,
             ContextRetriever retriever,
-            ChatMemoryStore store) {
+            ChatMemoryStore store,
+            String dataFolderPath) {
 
         return AiServices.builder(DocumentAssistantAgent.class)
                 .streamingChatModel(chatModel)
-                .tools(new KnowledgeBaseTools(retriever))
+                .tools(new KnowledgeBaseTools(retriever, dataFolderPath))
                 .chatMemoryProvider(chatId -> MessageWindowChatMemory.builder()
                         .id(chatId)
                         .maxMessages(20)

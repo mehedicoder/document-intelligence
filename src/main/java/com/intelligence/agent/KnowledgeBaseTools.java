@@ -17,7 +17,7 @@ public class KnowledgeBaseTools {
     }
 
     @Tool("Summarizes a specific document by its filename. Use this when the user says 'summarize' or 'summarise'.")
-    public String summarizeDocument(@P("The exact filename to summarize (e.g., roadmap.pdf)") String fileName) {
+    public String summarizeDocument(@P("the exact filename to summarize (e.g., roadmap.pdf)") String fileName) {
         try {
             Path path = Paths.get(currentFolderPath, fileName);
             List<String> lines;
@@ -42,7 +42,7 @@ public class KnowledgeBaseTools {
     }
 
     @Tool("Searches for snippets across all documents.")
-    public String searchDocuments(@P("Query") String query) {
+    public String searchDocuments(@P("query") String query) {
         return retriever.retrieve(dev.langchain4j.rag.query.Query.from(query))
                 .stream().map(c -> c.textSegment().text()).collect(java.util.stream.Collectors.joining("\n---\n"));
     }
