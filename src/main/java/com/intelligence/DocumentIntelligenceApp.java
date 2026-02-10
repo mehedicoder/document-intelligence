@@ -113,8 +113,9 @@ public class DocumentIntelligenceApp {
                 .modelName(EMBEDDING_MODEL_NAME)
                 .build();
     }
-     // passive RAG
-    /*private static DocumentAssistantAgent buildAssistant(StreamingChatModel chatModel, ContextRetriever retriever, ChatMemoryStore store) {
+
+    // passive RAG
+    /* private static DocumentAssistantAgent buildAssistant(StreamingChatModel chatModel, ContextRetriever retriever, ChatMemoryStore store) {
         return AiServices.builder(DocumentAssistantAgent.class)
                 .streamingChatModel(chatModel)
                 .contentRetriever(retriever)
@@ -124,10 +125,9 @@ public class DocumentIntelligenceApp {
                         .chatMemoryStore(store)
                         .build())
                 .build();
-    }*/
+    } */
 
     // reasoning agent
-
     private static DocumentAssistantAgent buildAssistant(
             StreamingChatModel chatModel,
             ContextRetriever retriever,
@@ -139,7 +139,7 @@ public class DocumentIntelligenceApp {
                 .tools(new KnowledgeBaseTools(retriever, dataFolderPath))
                 .chatMemoryProvider(chatId -> MessageWindowChatMemory.builder()
                         .id(chatId)
-                        .maxMessages(20)
+                        .maxMessages(CHAT_MEMORY_MAX_MESSAGES)
                         .chatMemoryStore(store)
                         .build())
                 .build();
